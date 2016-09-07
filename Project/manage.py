@@ -18,10 +18,11 @@ import forms
 from models import User
 from models import Comment
 from models import db as database
+from helper import date_format
 
 app = Flask(__name__)
-#app.secret_key = 'my_secret_key'
-#csrf = CsrfProtect(app)
+app.secret_key = 'my_secret_key'
+csrf = CsrfProtect(app)
 
 def generate_session(username, user_id):
 	session['user_id'] = user_id
@@ -109,7 +110,7 @@ def review(page=1):
 												User.username, User.email,
 												Comment.created_date, Comment.text).paginate(page, per_page, False)
 
-	return render_template('review.html', comments = comment_list )	
+	return render_template('review.html', comments = comment_list, date_format = date_format )	
 
 """ Funciones por questiones de tutoriales """
 @app.route('/setcookie')

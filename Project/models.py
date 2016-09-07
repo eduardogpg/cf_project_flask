@@ -61,12 +61,6 @@ class Comment(db.Model):
 	text = db.Column(db.String(250))
 	created_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
-	def get_date(self):
-		value = self.created_date
-		months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
-		month = months[value.month]
-		return "{} de {} del {}".format(value.day, month, value.year )
-
 	
 if __name__ == '__main__':
 	db.create_all()
