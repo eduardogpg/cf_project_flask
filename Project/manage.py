@@ -12,28 +12,35 @@ from flask import abort
 from flask import g
 from flask_wtf.csrf import CsrfProtect
 
-from werkzeug.security import generate_password_hash
-from werkzeug.security import check_password_hash
-
 import json     
 import forms
-import models
+
+from models import User
+from models import Comment
+from models import db as database
+											
 
 app = Flask(__name__)
 app.secret_key = 'my_secret_key'
 csrf = CsrfProtect(app)
 
+
+def generate_session(username, user_id):
+	session['user_id'] = user_id
+	session['username'] = username
+
 @app.errorhandler(404)
 def page_not_found(e):
 	return render_template('404.html'), 404
+
+@app.before_request
+def before_request():
+	pass
 
 @app.after_request
 def after_request(response):
 	return response
 
-@app.before_request
-def before_request():
-	pass
 
 @app.route('/')
 def index():
@@ -46,11 +53,11 @@ def login():
 	if request.method == 'POST' and login_form.validate():
 		username = login_form.username.data
 		password = login_form.password.data
-		user = models.User.query.filter_by(username = username).first()
-
 		final_message = 'Bienvenido a la plataforma {}'.format(username)
-		if user is not None and check_password_hash(user.password, password):
-			session['username'] = username
+
+		user = User.query.filter_by(username = username).first()
+		if user is not None and user.verify_password(password):
+			generate_session(user.username, user.id)
 			flash('Bienvenido a la plataforma {}'.format(username))	
 			return redirect(url_for('index'))
 		else:
@@ -68,14 +75,16 @@ def logout():
 def create():
 	create_form = forms.CreateForm(request.form)
 	if request.method == 'POST' and create_form.validate():
-		username = create_form.username.data
-		user = models.User(
-				username = username,
-				password = generate_password_hash(create_form.password.data),
-				email = create_form.email.data)
 
-		models.db.session.add(user)
-		models.db.session.commit()
+		username = create_form.username.data
+		user = User(
+								username = username,
+								password = create_form.password.data,
+								email = create_form.email.data)
+
+		database.session.add(user)
+		database.session.commit()
+		generate_session(user.username, user.id)
 		session['username'] = username
 		
 		success_message = 'Bienvenido a la plataforma {}'.format(username)
@@ -87,8 +96,18 @@ def create():
 def comment():
 	comment_form = forms.CommentForm(request.form)
 	if request.method == 'POST' and comment_form.validate():
-		print comment_form.honeypot.data
+		user_id = session['user_id']
+		comment = Comment( user_id = user_id, text = comment_form.comment.data )
+		database.session.add(comment)
+		database.session.commit()
+		flash("Muchas gracias por tu comentario!.")
+
 	return render_template('comment.html',form = comment_form)
+
+@app.route('/reviews/', methods=['GET'])
+@app.route('/reviews/<int:page>', methods=['GET'])
+def review(page=1):
+	return render_template('review.html')	
 
 """ Funciones por questiones de tutoriales """
 @app.route('/setcookie')
@@ -104,11 +123,11 @@ def getcookie():
 
 @app.route('/ajax-login', methods = ['POST'])
 def ajax_login():
+	print request.form
 	user =  request.form['username'];
 	response = { 'status': 200, 'user': user, 'id': 1 }
 	return json.dumps(response)
 
 if __name__ == '__main__':
 	app.run(debug=True, port=8000)
-	#models.db.create_all()
-	#models.db.session.commit()
+

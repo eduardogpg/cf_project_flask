@@ -12,16 +12,8 @@ def length_honeypot(form, field):
 		raise validators.ValidationError('Lo siento bot no vas a pasar')
 
 class CommentForm(Form):
-	username = StringField('username',
-						[ validators.Required(message = 'El username es requerido'),
-							validators.length(min=4, max=25, message='Ingrese un username valido') 
-						])
-	email = EmailField('Correo electronico',
-						[	validators.Required(message = 'El email es requerido!.'),
-							validators.Email(message='Ingre un email valido')
-						])
 	comment = TextField('Comentario')
-	honeypot = TextField("",[length_honeypot])
+	honeypot = HiddenField("",[length_honeypot])
 
 class LoginForm(Form):
 	username = TextField('Username', [validators.Required(message = 'El username es requerido')])
