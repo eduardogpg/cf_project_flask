@@ -16,13 +16,12 @@ from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 
 import json     
-
 import forms
 import models
 
 app = Flask(__name__)
-#app.secret_key = 'my_secret_key'
-#csrf = CsrfProtect(app)
+app.secret_key = 'my_secret_key'
+csrf = CsrfProtect(app)
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -102,6 +101,12 @@ def cookie():
 def getcookie():
 	custome = request.cookies.get('custom_cookie', '')
 	return render_template('cookie.html')
+
+@app.route('/ajax-login', methods = ['POST'])
+def ajax_login():
+	user =  request.form['username'];
+	response = { 'status': 200, 'user': user, 'id': 1 }
+	return json.dumps(response)
 
 if __name__ == '__main__':
 	app.run(debug=True, port=8000)

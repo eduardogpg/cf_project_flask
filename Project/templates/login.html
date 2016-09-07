@@ -9,9 +9,10 @@
 
             <br>
             <br>
-            <h3>Login</h3>
+            <h3>Login.</h3>
             <form id="login-form" method="POST">
-              
+                <input type=hidden name=_csrf_token value="{{ csrf_token() }}">
+
                 <div class="row control-group">
                     <div class="form-group col-xs-12 floating-label-form-group controls">
                          {{ render_field(form.username, class='form-control', id="username-login") }}
