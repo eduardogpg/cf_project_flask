@@ -5,9 +5,12 @@
 #pip install Flask-SQLAlchemy
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.inspection import inspect
 
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
+
+import datetime
 
 """
 To use SQLAlchemy in a declarative way with your application,
@@ -37,6 +40,7 @@ class User(db.Model):
 	email = db.Column(db.String(50))
 	password = db.Column(db.String(66))
 	comments = db.relationship('Comment', backref='users', lazy='dynamic')
+	created_date = db.Column(db.DateTime, default=datetime.datetime.now)
 
 	def __init__(self, username, email, password):
 		self.username = username
@@ -49,14 +53,21 @@ class User(db.Model):
 	def verify_password(self, password):
 		return check_password_hash(self.password, password)
 
-
 class Comment(db.Model):
 	__tablename__ = 'comments'
 
 	id = db.Column(db.Integer, primary_key=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 	text = db.Column(db.String(250))
+	created_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+	def get_date(self):
+		value = self.created_date
+		months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+		month = months[value.month]
+		return "{} de {} del {}".format(value.day, month, value.year )
+
+	
 if __name__ == '__main__':
 	db.create_all()
 

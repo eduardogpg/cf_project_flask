@@ -18,12 +18,10 @@ import forms
 from models import User
 from models import Comment
 from models import db as database
-											
 
 app = Flask(__name__)
-app.secret_key = 'my_secret_key'
-csrf = CsrfProtect(app)
-
+#app.secret_key = 'my_secret_key'
+#csrf = CsrfProtect(app)
 
 def generate_session(username, user_id):
 	session['user_id'] = user_id
@@ -40,7 +38,6 @@ def before_request():
 @app.after_request
 def after_request(response):
 	return response
-
 
 @app.route('/')
 def index():
@@ -107,7 +104,12 @@ def comment():
 @app.route('/reviews/', methods=['GET'])
 @app.route('/reviews/<int:page>', methods=['GET'])
 def review(page=1):
-	return render_template('review.html')	
+	per_page = 10
+	comment_list = Comment.query.join(User).add_columns(
+												User.username, User.email,
+												Comment.created_date, Comment.text).paginate(page, per_page, False)
+
+	return render_template('review.html', comments = comment_list )	
 
 """ Funciones por questiones de tutoriales """
 @app.route('/setcookie')
