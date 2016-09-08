@@ -25,19 +25,29 @@ from models import Comment
 from models import db as database
 from helper import date_format
 
+class Config(object):
+	SECRET_KEY = 'my_secret_key'
+	MAIL_SERVER = "smtp.gmail.com"
+	MAIL_PORT = 587
+	MAIL_USE_SSL = False
+	MAIL_USE_TLS = True
+	MAIL_USERNAME = "eduardo@codigofacilito.com"
+	MAIL_PASSWORD = "C=eQ9KF="
+
+	SQLALCHEMY_DATABASE_URI = 'mysql://root:@localhost/curso_flask'
+	SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+class DevelopmentConfig(Config):
+	DEBUG = True
+
 app = Flask(__name__)
+app.config.from_object(DevelopmentConfig)
 
-app.config['MAIL_SERVER'] = "smtp.gmail.com"
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = "eduardo@codigofacilito.com"
-app.config['MAIL_PASSWORD'] = "C=eQ9KF="
-
-app.secret_key = 'my_secret_key'
 csrf = CsrfProtect(app)
+mail = Mail(app)
 
 def send_email(user):
+	print "Vamos a enviar el mensaje"
 	msg = Message("Test numero uno",
 					sender="eduardo@codigofacilito.com",
 					recipients=["eduardo78d@gmail.com"])
@@ -54,6 +64,7 @@ def page_not_found(e):
 
 @app.before_request
 def before_request():
+	g.user = "before_request"
 	if 'username' not in session and request.endpoint in ['comment']:
 		return redirect(url_for('login'))
 
@@ -62,10 +73,13 @@ def before_request():
 
 @app.after_request
 def after_request(response):
+	g.user = g.user + " before_request"
+	print g.user
 	return response
 
 @app.route('/')
 def index():
+	g.user = g.user + " index"
 	username = session.get('username', '')
 	return render_template('index.html', username = username)
 
@@ -161,5 +175,5 @@ def ajax_login():
 	return json.dumps(response)
 
 if __name__ == '__main__':
-	app.run(debug=True, port=8000)
+	app.run()
 
