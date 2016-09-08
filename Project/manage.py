@@ -13,38 +13,24 @@ from flask import g
 from flask_wtf.csrf import CsrfProtect
 from flask import copy_current_request_context
 
+from config import DevelopmentConfig
+
 import json     
 import forms
+import threading
 
 from flask_mail import Mail
 from flask_mail import Message
-import threading
 
 from models import User
 from models import Comment
 from models import db as database
 from helper import date_format
 
-class Config(object):
-	SECRET_KEY = 'my_secret_key'
-	MAIL_SERVER = "smtp.gmail.com"
-	MAIL_PORT = 587
-	MAIL_USE_SSL = False
-	MAIL_USE_TLS = True
-	MAIL_USERNAME = "eduardo@codigofacilito.com"
-	MAIL_PASSWORD = "C=eQ9KF="
-
-	SQLALCHEMY_DATABASE_URI = 'mysql://root:@localhost/curso_flask'
-	SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-class DevelopmentConfig(Config):
-	DEBUG = True
-
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
-
-csrf = CsrfProtect(app)
-mail = Mail(app)
+csrf = CsrfProtect()
+mail = Mail()
 
 def send_email(user):
 	print "Vamos a enviar el mensaje"
@@ -175,5 +161,8 @@ def ajax_login():
 	return json.dumps(response)
 
 if __name__ == '__main__':
+	csrf.init_app(app)
+	mail.init_app(app)
+	database.init_app(app)
+	
 	app.run()
-

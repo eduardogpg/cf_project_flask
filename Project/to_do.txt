@@ -1,1 +1,0 @@
-Validar campos de authenticación

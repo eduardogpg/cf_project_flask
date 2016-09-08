@@ -3,13 +3,9 @@
 
 #http://flask-sqlalchemy.pocoo.org/2.1/
 #pip install Flask-SQLAlchemy
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.inspection import inspect
-
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
-
 import datetime
 
 """
@@ -19,10 +15,6 @@ Flask will automatically remove database sessions at the end of the request
 or when the application shuts down:
 """
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/curso_flask'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
 
 """
 Changes to the database are managed through a database session,
@@ -31,6 +23,7 @@ To prepare objects to be written to the database,
 they must be added to the session:
 Página 79
 """
+db = SQLAlchemy()
 
 class User(db.Model):
 	__tablename__ = 'users'
