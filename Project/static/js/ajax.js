@@ -1,6 +1,6 @@
 $(document).ready(function(){
 	
-	console.log("Ajax file!")
+	console.log("Jquery form")
 
 	function ajax_login(){
     $.ajax({
@@ -15,10 +15,10 @@ $(document).ready(function(){
         }
     });
 	}	
-	/*
-	$( "#login-form" ).submit(function( event ) {
+	//No existe este id, si es necesario utilizar ajax debemos de quitar -test
+    $( "#login-form-test" ).submit(function( event ) {
         event.preventDefault();
   	     ajax_login();
 	});
-	*/
+	
 });

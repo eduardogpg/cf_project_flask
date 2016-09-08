@@ -11,9 +11,14 @@ from flask import url_for
 from flask import abort
 from flask import g
 from flask_wtf.csrf import CsrfProtect
+from flask import copy_current_request_context
 
 import json     
 import forms
+
+from flask_mail import Mail
+from flask_mail import Message
+import threading
 
 from models import User
 from models import Comment
@@ -21,8 +26,23 @@ from models import db as database
 from helper import date_format
 
 app = Flask(__name__)
+
+app.config['MAIL_SERVER'] = "smtp.gmail.com"
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = "eduardo@codigofacilito.com"
+app.config['MAIL_PASSWORD'] = "C=eQ9KF="
+
 app.secret_key = 'my_secret_key'
 csrf = CsrfProtect(app)
+
+def send_email(user):
+	msg = Message("Test numero uno",
+					sender="eduardo@codigofacilito.com",
+					recipients=["eduardo78d@gmail.com"])
+	msg.html = render_template('thanks.html', user = user)
+	mail.send(msg)
 
 def generate_session(username, user_id):
 	session['user_id'] = user_id
@@ -34,7 +54,11 @@ def page_not_found(e):
 
 @app.before_request
 def before_request():
-	pass
+	if 'username' not in session and request.endpoint in ['comment']:
+		return redirect(url_for('login'))
+
+	elif 'username' in session and request.endpoint in ['login', 'create']:
+		return redirect(url_for('index'))
 
 @app.after_request
 def after_request(response):
@@ -73,20 +97,25 @@ def logout():
 def create():
 	create_form = forms.CreateForm(request.form)
 	if request.method == 'POST' and create_form.validate():
-
 		username = create_form.username.data
 		user = User(
 								username = username,
 								password = create_form.password.data,
 								email = create_form.email.data)
 
+		@copy_current_request_context
+		def send_message(message):
+			send_email(message)
+
 		database.session.add(user)
 		database.session.commit()
 		generate_session(user.username, user.id)
-		session['username'] = username
 		
 		success_message = 'Bienvenido a la plataforma {}'.format(username)
 		flash(success_message)
+		sender = threading.Thread(name='mail_sender', target=send_message, args=(username,))
+		sender.start()
+
 		return redirect(url_for('index'))
 	return render_template('create.html', form = create_form)
 

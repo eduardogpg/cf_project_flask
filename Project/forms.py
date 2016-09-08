@@ -42,5 +42,3 @@ class CreateForm(Form):
 	 	user = User.query.filter_by(username = username).first()
 	 	if user is not None:
 	 		raise validators.ValidationError('El username ya se encuentra registrado!')
-
-

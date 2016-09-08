@@ -60,7 +60,6 @@ class Comment(db.Model):
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 	text = db.Column(db.String(250))
 	created_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-
 	
 if __name__ == '__main__':
 	db.create_all()

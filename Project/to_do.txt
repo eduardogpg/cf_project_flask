@@ -1,4 +1,1 @@
-Mostrar las usuarios en la review
-Que no se caiga la aplicación cuando agrego un nuevo user a la plataforma con campo repetidos
-
 Validar campos de authenticación
