@@ -32,11 +32,10 @@ app.config.from_object(DevelopmentConfig)
 csrf = CsrfProtect()
 mail = Mail()
 
-def send_email(user):
-	print "Vamos a enviar el mensaje"
-	msg = Message("Test numero uno",
+def send_email(user, email):
+	msg = Message("Gracias por tu participación",
 					sender="eduardo@codigofacilito.com",
-					recipients=["eduardo78d@gmail.com"])
+					recipients=[email])
 	msg.html = render_template('thanks.html', user = user)
 	mail.send(msg)
 
@@ -164,5 +163,5 @@ if __name__ == '__main__':
 	csrf.init_app(app)
 	mail.init_app(app)
 	database.init_app(app)
-	
+
 	app.run()
